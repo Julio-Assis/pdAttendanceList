@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import Image from "next/image";
-
-import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import en from "date-fns/locale/en-GB";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -18,11 +14,69 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Typography from "@mui/material/Typography";
+import Table   from "@mui/material/Table"
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import Button from "@mui/material/Button";
 
 import "react-datepicker/dist/react-datepicker.css";
 
+interface PaymentData {
+  name: string;
+  amount_due: number;
+}
+function createPaymentRow(
+  name: string,
+  amount_due: number,
+): PaymentData {
+  return {
+    name,
+    amount_due,
+  };
+}
+
+function createPaymentsTable() {
+  const rows = [
+    createPaymentRow('Nacho', 42),
+    createPaymentRow("Julio", 42),
+    createPaymentRow("Anya", 42),
+    createPaymentRow("Capella", 42)
+  ]
+
+  return (
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell align="right">Amount Due</TableCell>
+            <TableCell align="right">Monzo Link</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((row) => (
+            <TableRow
+              key={row.name}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {row.name}
+              </TableCell>
+              <TableCell align="right">{row.amount_due}</TableCell>
+              <TableCell align="right">This is a monzo link</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
 export default function Home() {
+
   const [startDate, setStartDate] = useState<Dayjs>(new Date());
   const [name, setName] = useState("");
   const [practiceType, setPracticeType] = React.useState("");
@@ -57,12 +111,13 @@ export default function Home() {
   // Ideally this would be handled by a view/navigation
   // but this is just a hacky start.
   if (showPayments){
+    const paymentsTable = createPaymentsTable()
     body = (
       <div className={css(styles.body)}>
         <div className={css(styles.element)}>
 
           <Typography variant="h5" gutterBottom>
-            Payments due
+            {paymentsTable}
           </Typography>
           </div>
         <div className={css(styles.element)}>
