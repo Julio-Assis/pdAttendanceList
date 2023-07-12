@@ -55,80 +55,95 @@ export default function Home() {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={en}>
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <div className={css(styles.rootContainer)}>
-          <Typography variant="h4" gutterBottom>
-            PD Practice Sign Up Form
-          </Typography>
-
-          {isFormSubmitted ? (
-            <Typography variant="body1" gutterBottom>
-              Enjoy Practice!
+            <Typography variant="h4" gutterBottom>
+              PD Practice Sign Up Form
             </Typography>
-          ) : (
-            <div>
-              <div className={css(styles.formItem)}>
-                <TextField
-                  id="pd-student-name"
-                  label="Name"
-                  value={name}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setName(event.target.value);
-                    validateForm(event.target.value, practiceType);
-                  }}
-                />
-              </div>
-              <div className={css(styles.formItem)}>
-                <DatePicker
-                  label="PD Practice Date"
-                  value={startDate}
-                  onChange={(date) => {
-                    setStartDate(date);
-                    console.log(date);
-                  }}
-                />
-              </div>
-              <FormControl>
+          <div className={css(styles.body)}>
+            <div className={css(styles.element)}>
+
+            {isFormSubmitted ? (
+              <Typography variant="body1" gutterBottom>
+                Enjoy Practice!
+              </Typography>
+            ) : (
+              <div>
                 <div className={css(styles.formItem)}>
-                  <FormLabel id="demo-controlled-radio-buttons-group">
-                    For which session are you signing up for
-                  </FormLabel>
-                  <RadioGroup
-                    aria-labelledby="demo-controlled-radio-buttons-group"
-                    name="controlled-radio-buttons-group"
-                    value={practiceType}
-                    onChange={handleChange}
-                  >
-                    <FormControlLabel
-                      value="black_practice"
-                      control={<Radio />}
-                      label="45 Minutes - Black Practice"
-                    />
-                    <FormControlLabel
-                      value="combined_practice"
-                      control={<Radio />}
-                      label="90 minutes - Group Practice"
-                    />
-                    <FormControlLabel
-                      value="all_practice"
-                      control={<Radio />}
-                      label="135 minutes - Black + Group Practice"
-                    />
-                  </RadioGroup>
-                </div>
-                <div className={css(styles.formItem)}>
-                  <Button
-                    onClick={() => {
-                      alert("clicked");
-                      setIsFormSubmitted(true);
+                  <TextField
+                    id="pd-student-name"
+                    label="Name"
+                    value={name}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setName(event.target.value);
+                      validateForm(event.target.value, practiceType);
                     }}
-                    variant="contained"
-                    disabled={!canSubmit}
-                  >
-                    Submit!
-                  </Button>
+                  />
                 </div>
-              </FormControl>
+                <div className={css(styles.formItem)}>
+                  <DatePicker
+                    label="PD Practice Date"
+                    value={startDate}
+                    onChange={(date) => {
+                      setStartDate(date);
+                      console.log(date);
+                    }}
+                  />
+                </div>
+                <FormControl>
+                  <div className={css(styles.formItem)}>
+                    <FormLabel id="demo-controlled-radio-buttons-group">
+                      For which session are you signing up for
+                    </FormLabel>
+                    <RadioGroup
+                      aria-labelledby="demo-controlled-radio-buttons-group"
+                      name="controlled-radio-buttons-group"
+                      value={practiceType}
+                      onChange={handleChange}
+                    >
+                      <FormControlLabel
+                        value="black_practice"
+                        control={<Radio />}
+                        label="45 Minutes - Black Practice"
+                      />
+                      <FormControlLabel
+                        value="combined_practice"
+                        control={<Radio />}
+                        label="90 minutes - Group Practice"
+                      />
+                      <FormControlLabel
+                        value="all_practice"
+                        control={<Radio />}
+                        label="135 minutes - Black + Group Practice"
+                      />
+                    </RadioGroup>
+                  </div>
+                  <div className={css(styles.formItem)}>
+                    <Button
+                      onClick={() => {
+                        alert("clicked");
+                        setIsFormSubmitted(true);
+                      }}
+                      variant="contained"
+                      disabled={!canSubmit}
+                    >
+                      Submit!
+                    </Button>
+                  </div>
+                </FormControl>
+              </div>
+            )}
             </div>
-          )}
+            <div className={css(styles.element)}>
+            <Button
+              onClick={() => {
+              alert("clicked");
+              }}
+              variant="contained"
+            >
+              Check payment dues!
+            </Button>
+          </div>
+          </div>
+
         </div>
       </main>
     </LocalizationProvider>
@@ -137,6 +152,15 @@ export default function Home() {
 
 const styles = createStyles({
   rootContainer: {
+    display: "flex",
+    flexDirection: "column",
+  },
+
+  body: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  element: {
     display: "flex",
     flexDirection: "column",
   },
