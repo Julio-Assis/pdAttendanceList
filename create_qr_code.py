@@ -7,7 +7,7 @@ def test_generate_qr_code():
       box_size=10,
       border=4,
   )
-  qr.add_data('http://localhost:3000/')
+  qr.add_data('https://pd-sign-up-form.web.app/')
   qr.make(fit=True)
 
   image = qr.make_image(fill_color="blue", back_color="white")
