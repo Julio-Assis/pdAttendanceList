@@ -28,6 +28,7 @@ export default function Home() {
   const [practiceType, setPracticeType] = React.useState("");
   const [canSubmit, setCanSubmit] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [showPayments, setShowPayments] = React.useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPracticeType((event.target as HTMLInputElement).value);
@@ -51,6 +52,125 @@ export default function Home() {
     [startDate, name, practiceType]
   );
 
+  let body, form;
+
+  // Ideally this would be handled by a view/navigation
+  // but this is just a hacky start.
+  if (showPayments){
+    body = (
+      <div className={css(styles.body)}>
+        <div className={css(styles.element)}>
+
+          <Typography variant="h5" gutterBottom>
+            Payments due
+          </Typography>
+          </div>
+        <div className={css(styles.element)}>
+          <Button
+            onClick={() => {
+            alert("clicked");
+            setShowPayments(false);
+            setIsFormSubmitted(false);
+          }}
+          variant="contained"
+        >
+          Back to Form
+        </Button>
+        </div>
+      </div>
+    )
+  }else{
+    form = isFormSubmitted ? (
+      <Typography variant="body1" gutterBottom>
+        Enjoy Practice!
+      </Typography>
+    ) : (
+      <div>
+        <div className={css(styles.formItem)}>
+          <TextField
+            id="pd-student-name"
+            label="Name"
+            value={name}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              setName(event.target.value);
+              validateForm(event.target.value, practiceType);
+            }}
+          />
+        </div>
+        <div className={css(styles.formItem)}>
+          <DatePicker
+            label="PD Practice Date"
+            value={startDate}
+            onChange={(date) => {
+              setStartDate(date);
+              console.log(date);
+            }}
+          />
+        </div>
+        <FormControl>
+          <div className={css(styles.formItem)}>
+            <FormLabel id="demo-controlled-radio-buttons-group">
+              For which session are you signing up for
+            </FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-controlled-radio-buttons-group"
+              name="controlled-radio-buttons-group"
+              value={practiceType}
+              onChange={handleChange}
+            >
+              <FormControlLabel
+                value="black_practice"
+                control={<Radio />}
+                label="45 Minutes - Black Practice"
+              />
+              <FormControlLabel
+                value="combined_practice"
+                control={<Radio />}
+                label="90 minutes - Group Practice"
+              />
+              <FormControlLabel
+                value="all_practice"
+                control={<Radio />}
+                label="135 minutes - Black + Group Practice"
+              />
+            </RadioGroup>
+          </div>
+          <div className={css(styles.formItem)}>
+            <Button
+              onClick={() => {
+                alert("clicked");
+                setIsFormSubmitted(true);
+              }}
+              variant="contained"
+              disabled={!canSubmit}
+            >
+              Submit!
+            </Button>
+          </div>
+        </FormControl>
+      </div>
+    )
+
+    body = (
+      <div className={css(styles.body)}>
+        <div className={css(styles.element)}>
+          {form}
+        </div>
+        <div className={css(styles.element)}>
+          <Button
+            onClick={() => {
+            alert("clicked");
+            setShowPayments(true);
+            }}
+            variant="contained"
+          >
+            Check payment dues!
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={en}>
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -59,89 +179,7 @@ export default function Home() {
               PD Practice Sign Up Form
             </Typography>
           <div className={css(styles.body)}>
-            <div className={css(styles.element)}>
-
-            {isFormSubmitted ? (
-              <Typography variant="body1" gutterBottom>
-                Enjoy Practice!
-              </Typography>
-            ) : (
-              <div>
-                <div className={css(styles.formItem)}>
-                  <TextField
-                    id="pd-student-name"
-                    label="Name"
-                    value={name}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setName(event.target.value);
-                      validateForm(event.target.value, practiceType);
-                    }}
-                  />
-                </div>
-                <div className={css(styles.formItem)}>
-                  <DatePicker
-                    label="PD Practice Date"
-                    value={startDate}
-                    onChange={(date) => {
-                      setStartDate(date);
-                      console.log(date);
-                    }}
-                  />
-                </div>
-                <FormControl>
-                  <div className={css(styles.formItem)}>
-                    <FormLabel id="demo-controlled-radio-buttons-group">
-                      For which session are you signing up for
-                    </FormLabel>
-                    <RadioGroup
-                      aria-labelledby="demo-controlled-radio-buttons-group"
-                      name="controlled-radio-buttons-group"
-                      value={practiceType}
-                      onChange={handleChange}
-                    >
-                      <FormControlLabel
-                        value="black_practice"
-                        control={<Radio />}
-                        label="45 Minutes - Black Practice"
-                      />
-                      <FormControlLabel
-                        value="combined_practice"
-                        control={<Radio />}
-                        label="90 minutes - Group Practice"
-                      />
-                      <FormControlLabel
-                        value="all_practice"
-                        control={<Radio />}
-                        label="135 minutes - Black + Group Practice"
-                      />
-                    </RadioGroup>
-                  </div>
-                  <div className={css(styles.formItem)}>
-                    <Button
-                      onClick={() => {
-                        alert("clicked");
-                        setIsFormSubmitted(true);
-                      }}
-                      variant="contained"
-                      disabled={!canSubmit}
-                    >
-                      Submit!
-                    </Button>
-                  </div>
-                </FormControl>
-              </div>
-            )}
-            </div>
-            <div className={css(styles.element)}>
-            <Button
-              onClick={() => {
-              alert("clicked");
-              }}
-              variant="contained"
-            >
-              Check payment dues!
-            </Button>
-          </div>
+            {body}
           </div>
 
         </div>
