@@ -16,6 +16,8 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { db } from "./firebase/FireBaseApp";
 
 export default function Home() {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
@@ -114,8 +116,29 @@ export default function Home() {
                   </div>
                   <div className={css(styles.formItem)}>
                     <Button
-                      onClick={() => {
-                        alert("clicked");
+                      onClick={async () => {
+                        try {
+                          console.log("called this");
+                          // const docRef = await addDoc(
+                          //   collection(db, "users_v00"),
+                          //   {
+                          //     first: "Ada",
+                          //     last: "Lovelace",
+                          //     born: 1815,
+                          //   }
+                          // );
+                          // console.log("Document written with ID: ", docRef.id);
+                        } catch (e) {
+                          console.error("Error adding document: ", e);
+                        }
+
+                        const querySnapshot = await getDocs(
+                          collection(db, "users_v00")
+                        );
+                        querySnapshot.forEach((doc) => {
+                          console.log(`${doc.id} => ${doc.data().first}`);
+                        });
+
                         setIsFormSubmitted(true);
                       }}
                       variant="contained"
