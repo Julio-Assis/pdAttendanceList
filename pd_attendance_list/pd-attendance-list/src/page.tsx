@@ -119,15 +119,15 @@ export default function Home() {
                       onClick={async () => {
                         try {
                           console.log("called this");
-                          // const docRef = await addDoc(
-                          //   collection(db, "users_v00"),
-                          //   {
-                          //     first: "Ada",
-                          //     last: "Lovelace",
-                          //     born: 1815,
-                          //   }
-                          // );
-                          // console.log("Document written with ID: ", docRef.id);
+                          const docRef = await addDoc(
+                            collection(db, "users_v00"),
+                            {
+                              first: "Ada",
+                              last: "Lovelace",
+                              born: 1815,
+                            }
+                          );
+                          console.log("Document written with ID: ", docRef.id);
                         } catch (e) {
                           console.error("Error adding document: ", e);
                         }
@@ -155,6 +155,10 @@ export default function Home() {
       </LocalizationProvider>
     </div>
   );
+}
+
+async function blah() {
+  return 0;
 }
 
 const styles = createStyles({
