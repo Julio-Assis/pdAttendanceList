@@ -1,0 +1,24 @@
+service: pd-server-attendance-list
+
+provider:
+ name: aws
+ runtime: nodejs18.x
+ memorySize: 512
+ timeout: 10
+ stage: production
+ region: eu-central-1
+
+functions:
+ api:
+   handler: lambda.universal
+   events:
+     - http: ANY {proxy+}
+     - http: ANY /
+
+package:
+  exclude:
+    - ./node_moules/**
+    - ./venv/**
+
+  include:
+    - build/**

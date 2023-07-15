@@ -1,5 +1,7 @@
 import express, { Express, Request, Response } from "express";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import cors from "cors";
 import { db } from "./firebase_client/firebaseFirestore";
 import {
   collection,
@@ -16,6 +18,8 @@ import * as crypto from "crypto";
 dotenv.config();
 
 const app: Express = express();
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 const port = process.env.PORT;
 
 const attendancesRef = collection(db, "attendances_v00");
@@ -37,6 +41,18 @@ app.get("/write", async (req: Request, res: Response) => {
     console.error("Error adding document: ", e);
     res.send("We failed with " + e);
   }
+});
+
+app.post("/registerAttendee", async (req: Request, res: Response) => {
+  console.log("Got body:", req.body);
+  await setDoc(doc(attendancesRef, crypto.randomUUID()), {
+    name: req.body.name,
+    date_day: parseInt(req.body.date_day),
+    date_year: parseInt(req.body.date_year),
+    date_month: parseInt(req.body.date_month),
+    practice_type: req.body.practice_type,
+  });
+  res.sendStatus(200);
 });
 
 async function writeBaseUsers() {
@@ -80,9 +96,14 @@ app.get("/read", async (req: Request, res: Response) => {
   const result = querySnapshot.forEach((doc) => {
     results.push(doc.data());
   });
-  res.send(JSON.stringify(results));
+  const jsonResult = JSON.stringify(results);
+  console.log("being called");
+  console.log(jsonResult);
+  res.send(jsonResult);
 });
 
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-});
+module.exports = app;
+
+// app.listen(port, () => {
+//   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+// });

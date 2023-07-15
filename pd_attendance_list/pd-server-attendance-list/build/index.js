@@ -36,12 +36,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const body_parser_1 = __importDefault(require("body-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
 const firebaseFirestore_1 = require("./firebase_client/firebaseFirestore");
 const firestore_1 = require("firebase/firestore");
 const crypto = __importStar(require("crypto"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
+app.use(body_parser_1.default.urlencoded({ extended: true }));
 const port = process.env.PORT;
 const attendancesRef = (0, firestore_1.collection)(firebaseFirestore_1.db, "attendances_v00");
 app.get("/", (req, res) => {
@@ -61,6 +65,17 @@ app.get("/write", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.error("Error adding document: ", e);
         res.send("We failed with " + e);
     }
+}));
+app.post("/registerAttendee", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Got body:", req.body);
+    yield (0, firestore_1.setDoc)((0, firestore_1.doc)(attendancesRef, crypto.randomUUID()), {
+        name: req.body.name,
+        date_day: parseInt(req.body.date_day),
+        date_year: parseInt(req.body.date_year),
+        date_month: parseInt(req.body.date_month),
+        practice_type: req.body.practice_type,
+    });
+    res.sendStatus(200);
 }));
 function writeBaseUsers() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -96,8 +111,12 @@ app.get("/read", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = querySnapshot.forEach((doc) => {
         results.push(doc.data());
     });
-    res.send(JSON.stringify(results));
+    const jsonResult = JSON.stringify(results);
+    console.log("being called");
+    console.log(jsonResult);
+    res.send(jsonResult);
 }));
-app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-});
+module.exports = app;
+// app.listen(port, () => {
+//   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+// });
