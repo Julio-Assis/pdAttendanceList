@@ -104,6 +104,7 @@ export default function AttendanceForm({ onSubmit }: AttendanceFormProps) {
           <Button
             onClick={async () => {
               try {
+                onSubmit(true);
                 await axios.post(
                   `${URL_PREFIX}/registerAttendee`,
                   {
@@ -122,8 +123,6 @@ export default function AttendanceForm({ onSubmit }: AttendanceFormProps) {
               } catch (e) {
                 console.error("Error adding document: ", e);
               }
-
-              onSubmit(true);
             }}
             variant="contained"
             disabled={!canSubmit}
