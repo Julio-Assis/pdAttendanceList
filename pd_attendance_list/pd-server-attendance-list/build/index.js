@@ -37,12 +37,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const dotenv_1 = __importDefault(require("dotenv"));
+/* eslint-disable import/first */
+require('dotenv').config();
 const cors_1 = __importDefault(require("cors"));
 const firebaseFirestore_1 = require("./firebase_client/firebaseFirestore");
 const firestore_1 = require("firebase/firestore");
 const crypto = __importStar(require("crypto"));
-dotenv_1.default.config();
+// dotenv.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -51,21 +52,6 @@ const attendancesRef = (0, firestore_1.collection)(firebaseFirestore_1.db, "atte
 app.get("/", (req, res) => {
     res.send("Express + TypeScript Server anything cool");
 });
-app.get("/write", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const docRef = yield (0, firestore_1.addDoc)((0, firestore_1.collection)(firebaseFirestore_1.db, "users"), {
-            first: "Ada",
-            last: "Lovelace",
-            born: 1815,
-        });
-        console.log("Document written with ID: ", docRef.id);
-        res.send("We wrote ID " + docRef.id);
-    }
-    catch (e) {
-        console.error("Error adding document: ", e);
-        res.send("We failed with " + e);
-    }
-}));
 app.post("/registerAttendee", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Got body:", req.body);
     yield (0, firestore_1.setDoc)((0, firestore_1.doc)(attendancesRef, crypto.randomUUID()), {
@@ -77,46 +63,56 @@ app.post("/registerAttendee", (req, res) => __awaiter(void 0, void 0, void 0, fu
     });
     res.sendStatus(200);
 }));
-function writeBaseUsers() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const date = new Date();
-        yield (0, firestore_1.setDoc)((0, firestore_1.doc)(attendancesRef, crypto.randomUUID()), {
-            name: "Julio",
-            date_day: date.getDate(),
-            date_year: date.getFullYear(),
-            date_month: date.getMonth(),
-            practice_type: "all_practice",
-        });
-        yield (0, firestore_1.setDoc)((0, firestore_1.doc)(attendancesRef, crypto.randomUUID()), {
-            name: "Anja",
-            date_day: date.getDate(),
-            date_year: date.getFullYear(),
-            date_month: date.getMonth(),
-            practice_type: "black_practice",
-        });
-        yield (0, firestore_1.setDoc)((0, firestore_1.doc)(attendancesRef, crypto.randomUUID()), {
-            name: "Laura",
-            date_day: date.getDate(),
-            date_year: date.getFullYear(),
-            date_month: date.getMonth(),
-            practice_type: "all_practice",
-        });
-    });
-}
+app.post("/deleteAttendee", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Got body for deletion: ', req.body);
+    const year = Number.parseInt(req.body.year);
+    const day = Number.parseInt(req.body.day);
+    const month = Number.parseInt(req.body.month);
+    const querySnapshotToDelete = yield fetchQuerySnapshot(year, day, month);
+    querySnapshotToDelete.forEach((doc) => __awaiter(void 0, void 0, void 0, function* () {
+        if (doc.id === req.body.id) {
+            console.log('checking snapshot to delete');
+            console.log(doc.data.toString());
+            yield (0, firestore_1.deleteDoc)(doc.ref);
+            console.log(`deleted document with id=${doc.id}`);
+        }
+    }));
+    const jsonResult = yield fetchAttendessInJSONResult(year, day, month);
+    console.log("being called after delete Attendee");
+    console.log(jsonResult);
+    res.send(jsonResult);
+}));
 app.get("/read", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const date = new Date();
-    const q = (0, firestore_1.query)(attendancesRef, (0, firestore_1.where)("date_year", "==", date.getFullYear()), (0, firestore_1.where)("date_day", "==", date.getDate()), (0, firestore_1.where)("date_month", "==", date.getMonth()));
-    const querySnapshot = yield (0, firestore_1.getDocs)(q);
-    const results = [];
-    const result = querySnapshot.forEach((doc) => {
-        results.push(doc.data());
-    });
-    const jsonResult = JSON.stringify(results);
+    console.log("checking the request body", req.query);
+    console.log(date.getFullYear(), date.getDate(), date.getDay());
+    const year = Number.parseInt(req.query.year);
+    const day = Number.parseInt(req.query.day);
+    const month = Number.parseInt(req.query.month);
+    const jsonResult = yield fetchAttendessInJSONResult(year, day, month);
     console.log("being called");
     console.log(jsonResult);
     res.send(jsonResult);
 }));
-module.exports = app;
-// app.listen(port, () => {
-//   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-// });
+function fetchAttendessInJSONResult(year, day, month) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const querySnapshot = yield fetchQuerySnapshot(year, day, month);
+        const results = [];
+        querySnapshot.forEach((doc) => {
+            results.push(Object.assign(Object.assign({}, doc.data()), { id: doc.id }));
+        });
+        const jsonResult = JSON.stringify(results);
+        return jsonResult;
+    });
+}
+function fetchQuerySnapshot(year, day, month) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const q = (0, firestore_1.query)(attendancesRef, (0, firestore_1.where)("date_year", "==", year), (0, firestore_1.where)("date_day", "==", day), (0, firestore_1.where)("date_month", "==", month));
+        const querySnapshot = yield (0, firestore_1.getDocs)(q);
+        return querySnapshot;
+    });
+}
+// module.exports = app;
+app.listen(port, () => {
+    console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+});

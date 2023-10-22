@@ -12,9 +12,12 @@ import axios from "axios";
 
 interface PaymentsViewProps {
   onClose: () => void;
+  startDate: Date;
+  isAdmin: boolean;
 }
 
 interface Attendee {
+  id: string;
   name: string;
   date_year: string;
   date_month: string;
@@ -23,6 +26,7 @@ interface Attendee {
 }
 
 interface AttendeeWithPayment {
+  id: string;
   name: string;
   date_year: string;
   date_month: string;
@@ -31,14 +35,15 @@ interface AttendeeWithPayment {
   total_payment: string;
 }
 
-const URL_PREFIX =
-  "https://c4mn2drui8.execute-api.eu-central-1.amazonaws.com/production/";
+const URL_PREFIX = 'http://localhost:8000';
+// const URL_PREFIX =
+//   "https://c4mn2drui8.execute-api.eu-central-1.amazonaws.com/production/";
 
-export default function PaymentsView({ onClose }: PaymentsViewProps) {
+export default function PaymentsView({ onClose, startDate, isAdmin }: PaymentsViewProps) {
   const [attendees, setAttendees] = useState<Array<AttendeeWithPayment>>([]);
 
   useEffect(() => {
-    axios.get(`${URL_PREFIX}/read`).then((res) => {
+    axios.get(`${URL_PREFIX}/read?year=${startDate.getFullYear()}&month=${startDate.getMonth()}&day=${startDate.getDate()}`).then((res) => {
       return setAttendees(computeAttendeesWithPayments(res.data));
     });
   }, []);
@@ -54,6 +59,7 @@ export default function PaymentsView({ onClose }: PaymentsViewProps) {
               <TableCell align="right">Month</TableCell>
               <TableCell align="right">Day</TableCell>
               <TableCell align="right">Amount owed</TableCell>
+              {isAdmin && <TableCell align="right">Delete Entry</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -69,13 +75,40 @@ export default function PaymentsView({ onClose }: PaymentsViewProps) {
                 <TableCell align="right">{row.date_month + 1}</TableCell>
                 <TableCell align="right">{row.date_day}</TableCell>
                 <TableCell align="right">£{row.total_payment}</TableCell>
+                {isAdmin && <TableCell align="right">
+                  <Button onClick={() => {
+                    try {
+                      axios.post(`${URL_PREFIX}/deleteAttendee`,
+                        {
+                          id: row.id,
+                          day: row.date_day,
+                          month: row.date_month,
+                          year: row.date_year
+                        },
+                        {
+                          headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                          },
+                        }).then((res) => {
+                          console.log('calling this');
+                          console.log(res.data);
+                          return setAttendees(computeAttendeesWithPayments(res.data));
+                        });
+                    } catch (e) {
+                      console.error("Error deleting document: ", e);
+                    }
+
+                  }}
+                    variant='contained'
+                  >Delete Entry</Button>
+                </TableCell>}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
       <Button onClick={() => onClose()}>Close Payments View</Button>
-    </div>
+    </div >
   );
 }
 
@@ -101,7 +134,7 @@ function computeAttendeesWithPayments(
     0
   );
 
-  const studioCost = 67.5;
+  const studioCost = 69.5;
 
   return attendees.map((attendee) => {
     let paymentUnits = 0;
@@ -113,6 +146,7 @@ function computeAttendeesWithPayments(
       paymentUnits = allPractice;
     }
     return {
+      id: attendee.id,
       name: attendee.name,
       date_year: attendee.date_year,
       date_month: attendee.date_month,
@@ -120,7 +154,11 @@ function computeAttendeesWithPayments(
       practice_type: attendee.practice_type,
       total_payment: ((studioCost * paymentUnits) / totalUnits).toPrecision(2),
     };
-  });
+  }).sort(
+    (attendeeA, attendeeB) => {
+      return attendeeA.name.toLowerCase() < attendeeB.name.toLowerCase() ? -1 : 1;
+    }
+  );
 }
 
 const styles = createStyles({

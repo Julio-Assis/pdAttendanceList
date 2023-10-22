@@ -8,8 +8,6 @@ import FormLabel from "@mui/material/FormLabel";
 import Button from "@mui/material/Button";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { db } from "./firebase/FireBaseApp";
 import axios from "axios";
 
 import { css } from "@emotion/css";
@@ -17,16 +15,19 @@ import { createStyles } from "./shared/createStyles";
 
 interface AttendanceFormProps {
   onSubmit: (isSubmitted: boolean) => void;
+  startDate: Date;
+  setStartDate: (d: Date) => void;
 }
 
-const URL_PREFIX =
-  "https://c4mn2drui8.execute-api.eu-central-1.amazonaws.com/production/";
+const URL_PREFIX = 'http://localhost:8000';
+// const URL_PREFIX =
+//   "https://c4mn2drui8.execute-api.eu-central-1.amazonaws.com/production/";
 
-export default function AttendanceForm({ onSubmit }: AttendanceFormProps) {
-  const [startDate, setStartDate] = useState<Date>(new Date());
+export default function AttendanceForm({ onSubmit, startDate, setStartDate }: AttendanceFormProps) {
   const [name, setName] = useState("");
   const [practiceType, setPracticeType] = React.useState("");
   const [canSubmit, setCanSubmit] = useState(false);
+
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPracticeType((event.target as HTMLInputElement).value);
@@ -103,6 +104,11 @@ export default function AttendanceForm({ onSubmit }: AttendanceFormProps) {
         <div className={css(styles.formItem)}>
           <Button
             onClick={async () => {
+              if (name === "super-admin") {
+                onSubmit(false);
+                return;
+              }
+
               try {
                 onSubmit(true);
                 await axios.post(

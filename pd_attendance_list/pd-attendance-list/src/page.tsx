@@ -14,8 +14,10 @@ import PaymentsView from "./paymentsView";
 import Button from "@mui/material/Button";
 
 export default function Home() {
+  const [startDate, setStartDate] = useState<Date>(new Date());
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [shouldDisplayPayments, setShouldDisplayPayments] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <div
@@ -47,11 +49,21 @@ export default function Home() {
               </>
             ) : (
               <AttendanceForm
-                onSubmit={(isSubmitted) => setIsFormSubmitted(isSubmitted)}
+                onSubmit={(isSubmitted) => {
+                  if (!isSubmitted) {
+                    setIsAdmin(true);
+                  } else {
+                    setIsFormSubmitted(isSubmitted);
+                  }
+                  }
+                }
+                startDate={startDate}
+                setStartDate={setStartDate}
               />
             )}
             {shouldDisplayPayments ? (
-              <PaymentsView onClose={() => setShouldDisplayPayments(false)} />
+              <PaymentsView onClose={() => setShouldDisplayPayments(false)} startDate={startDate}
+              isAdmin={isAdmin}/>
             ) : (
               <div className={css(styles.formItem)}>
                 <Button
